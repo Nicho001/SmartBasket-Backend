@@ -4,37 +4,44 @@ const Bill = require("../models/bill");
 const Shop = require("../models/shop");
 const dateTime = require("node-datetime");
 
-// userRouter.post("/scanAdd/:id",  async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const product = await Product.findOne({ barcode: id });
-//     let user = await User.findById(req.user);
+userRouter.post("/scanAdd/:id/:phone", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const product = await Shop.findOne(
+      { "products.barcode": id },
+    );
+    let bill = await Bill.find(req.params.phone);
 
-//     if (user.cart.length == 0) {
-//       user.cart.push({ product, quantity: 1 });
-//       user = await user.save();
-//       return res.json(product).status(200);
-//     } else {
-//       let isProductFound = false;
-//       for (let i = 0; i < user.cart.length; i++) {
-//         if (user.cart[i].product._id.equals(product._id)) {
-//           isProductFound = true;
-//         }
-//       }
-//       if (!isProductFound) {
-//         user.cart.push({ product, quantity: 1 });
-//         user = await user.save();
-//         return res.json(product).status(200);
-//       }
+    if (bill.cart.length == 0) {
+      bill.cart.push({ product });
+      bill = await bill.save();
+      return res.json(product).status(200);
+    } else {
+      let isProductFound = false;
+      for (let i = 0; i < bill.cart.length; i++) {
+        if (bill.cart[i].product.barcode.equals(id)) {
+          isProductFound = true;
+        }
+      }
+      if (!isProductFound) {
+        bill.cart.push({ product });
+        bill = await bill.save();
+        return res.json(product).status(200);
+      }
 
-//       if (isProductFound) {
-//         return res.json().status(200);
-//       }
-//     }
-//   } catch (e) {
-//     res.status(400).json({ error: e.message });
-//   }
-// });
+      if (isProductFound) {
+        for (let i = 0; i < bill.cart.length; i++) {
+          if (bill.cart[i].product.barcode.equals(id)) {
+            bill.cart.splice(i, 1);
+          }
+        }
+        return res.json().status(200);
+      }
+    }
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
 
 // userRouter.post("/addQuantity/:id", async (req, res) => {
 //   try {
@@ -58,15 +65,15 @@ const dateTime = require("node-datetime");
 //     const product = await Product.findById(id);
 //     let user = await User.findById(req.user);
 
-//     for (let i = 0; i < user.cart.length; i++) {
-//       if (user.cart[i].product._id.equals(product._id)) {
-//         if (user.cart[i].quantity == 1) {
-//           user.cart.splice(i, 1);
-//         } else {
-//           user.cart[i].quantity -= 1;
-//         }
-//       }
+// for (let i = 0; i < user.cart.length; i++) {
+//   if (user.cart[i].product._id.equals(product._id)) {
+//     if (user.cart[i].quantity == 1) {
+//       user.cart.splice(i, 1);
+//     } else {
+//       user.cart[i].quantity -= 1;
 //     }
+//   }
+// }
 //     user = await user.save();
 //     res.status(200).json({ msg: "Item Removed" });
 //   } catch (e) {
@@ -85,10 +92,10 @@ const dateTime = require("node-datetime");
 //   }
 // });
 
-// userRouter.post("/checkout/:name/:total",  async (req, res) => {
+// userRouter.post("/checkout/:name/:phone/:total",  async (req, res) => {
 //   try {
-//     const { name, total } = req.params;
-//     let user = await User.findById(req.user);
+//     const { name, total ,phone} = req.params;
+//     let user = await Bill.findById(req.user);
 //     let shop = await Shop.findOne({ name });
 //     let shopImage = shop.images;
 //     if (user.cart.length == 0) {
