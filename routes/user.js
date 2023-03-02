@@ -4,44 +4,61 @@ const Bill = require("../models/bill");
 const Shop = require("../models/shop");
 const dateTime = require("node-datetime");
 
-userRouter.post("/scanAdd/:id/:phone", async (req, res) => {
+userRouter.post('/scanAdd/:id/:phone', async (req, res) => {
   try {
-    const { id } = req.params;
-    const product = await Shop.findOne(
-      { "products.barcode": id },
-    );
-    let bill = await Bill.find(req.params.phone);
+    const { id, phone } = req.params;
+    let bill = await Bill.findOne({ phone_no: phone });
 
-    if (bill.cart.length == 0) {
-      bill.cart.push({ product });
-      bill = await bill.save();
-      return res.json(product).status(200);
-    } else {
+    if (!bill) {
+      // create new bill if not found
+      bill = new Bill({
+        phone_no: phone,
+        name: 'John Doe', // default name
+        time: new Date().toISOString(),
+        cart: [],
+      });
+    }
+
+    const product = await Shop.findOne({ 'products.barcode': id });
+    if (product) {
       let isProductFound = false;
       for (let i = 0; i < bill.cart.length; i++) {
-        if (bill.cart[i].product.barcode.equals(id)) {
+        if (bill.cart[i].barcode == id) {
           isProductFound = true;
+          // bill.cart[i].quantity++; // increase quantity if product already in cart
         }
       }
-      if (!isProductFound) {
-        bill.cart.push({ product });
-        bill = await bill.save();
-        return res.json(product).status(200);
-      }
-
       if (isProductFound) {
         for (let i = 0; i < bill.cart.length; i++) {
-          if (bill.cart[i].product.barcode.equals(id)) {
+          if (bill.cart[i].barcode == id) {
             bill.cart.splice(i, 1);
+            break; // add a break statement to exit the loop after deleting the product
           }
         }
-        return res.json().status(200);
+      } else {
+        // add new product to cart
+        const newProduct = product.products.find(p => p.barcode === id);
+        bill.cart.push(newProduct);
       }
+
+      // update total price
+      // const totalPrice = bill.cart.reduce((acc, item) => acc + item.product.price, 0);
+      // bill.totalPrice = totalPrice;
+
+      // save the bill
+      bill = await bill.save();
+
+      return res.json(product).status(200);
+    } else {
+      return res.json({ error: 'Product not found' }).status(404);
     }
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
+
+
+
 
 // userRouter.post("/addQuantity/:id", async (req, res) => {
 //   try {
