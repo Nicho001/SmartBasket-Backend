@@ -5,22 +5,51 @@ const billSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  userId: {
+  phone_no: {
     required: true,
     type: String,
   },
-  shopName: {
+  name: {
     required: true,
     type: String,
   },
-  shopImage: {
+  time: {
     required: true,
     type: String,
   },
-  Time: {
-    required: true,
-    type: String,
-  },
+  cart: [
+    {
+      name: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      description: {
+        type: String,
+        required: true,
+      },
+      images: {
+        type: String,
+        required: true,
+      },
+      price: {
+        type: Number,
+        required: true,
+      },
+      category: {
+        type: String,
+        required: true,
+      },
+      barcode: {
+        type: String,
+        required: true,
+      },
+      quantity: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
 
 const Bill = mongoose.model("Bill", billSchema);

@@ -3,7 +3,6 @@ const userRouter = express.Router();
 const Bill = require("../models/bill");
 const Shop = require("../models/shop");
 const dateTime = require("node-datetime");
-const Product = require("../models/product");
 
 // userRouter.post("/scanAdd/:id",  async (req, res) => {
 //   try {
