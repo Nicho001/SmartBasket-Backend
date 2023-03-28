@@ -25,6 +25,10 @@ mongoose
     console.log("Database Connected");
     io.on("connection", (socket) => {
       console.log("Connected", socket.id);
+
+      socket.emit("connection-success", {
+        id: socket.id
+      })
     });
   })
   .catch((e) => {
