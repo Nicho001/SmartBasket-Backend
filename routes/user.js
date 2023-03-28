@@ -3,6 +3,7 @@ const userRouter = express.Router();
 const Bill = require("../models/bill");
 const Shop = require("../models/shop");
 const dateTime = require("node-datetime");
+const io = require("../socket");
 
 userRouter.post('/scanAdd/:id/:phone', async (req, res) => {
   try {
@@ -47,6 +48,10 @@ userRouter.post('/scanAdd/:id/:phone', async (req, res) => {
 
       // save the bill
       bill = await bill.save();
+
+      await io.getIO().emit("bill", {
+        details: bill
+      });
 
       return res.json(product).status(200);
     } else {
