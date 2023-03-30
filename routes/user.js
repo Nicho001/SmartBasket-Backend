@@ -1,6 +1,7 @@
 const express = require("express");
 const userRouter = express.Router();
 const Bill = require("../models/bill");
+const FinalBill = require("../models/finalbill");
 const Shop = require("../models/shop");
 const dateTime = require("node-datetime");
 const io = require("../socket");
@@ -146,35 +147,32 @@ userRouter.post('/updateInfo', async (req, res) => {
 //   }
 // });
 
-// userRouter.post("/checkout/:name/:phone/:total",  async (req, res) => {
-//   try {
-//     const { name, total ,phone} = req.params;
-//     let user = await Bill.findById(req.user);
-//     let shop = await Shop.findOne({ name });
-//     let shopImage = shop.images;
-//     if (user.cart.length == 0) {
-//       return res.status(400).json({ msg: "Cart Empty" });
-//     }
-//     let items = user.cart;
-//     user.cart = [];
-//     user = await user.save();
-//     const dt = dateTime.create();
-//     let datetime = dt.format("d-m-Y\nI:M p");
+userRouter.post("/checkout/:total",  async (req, res) => {
+  try {
+    const {total } = req.params;
+    let user = await Bill.findOne();
+    if (user.cart.length == 0) {
+      return res.status(400).json({ msg: "Cart Empty" });
+    }
+    let items = user.cart;
+    user.cart = [];
+    user = await user.save();
+    const dt = dateTime.create();
+    let datetime = dt.format("d-m-Y\nI:M p");
 
-//     let bill = new Bill({
-//       shopName: name,
-//       shopImage,
-//       products: items,
-//       totalPrice: total,
-//       userId: req.user,
-//       Time: datetime,
-//     });
-//     bill = await bill.save();
-//     res.status(200).json(bill);
-//   } catch (e) {
-//     res.status(400).json({ error: e.message });
-//   }
-// });
+    let finalbill = new FinalBill({
+      phone_no:user.phone_no,
+      name:user.name,
+      products: items,
+      totalPrice: total,
+      time: datetime,
+    });
+    finalbill = await finalbill.save();
+    res.status(200).json(finalbill);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
 
 userRouter.get("/recentpurchases", async (req, res) => {
   try {
