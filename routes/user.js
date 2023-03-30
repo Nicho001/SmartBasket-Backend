@@ -8,7 +8,7 @@ const io = require("../socket");
 userRouter.post('/scanAdd/:id/', async (req, res) => {
   try {
     const { id } = req.params;
-    let bill = await Bill.find();
+    let bill = await Bill.findOne();
 
     if (!bill) {
       // create new bill if not found
