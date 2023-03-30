@@ -62,6 +62,38 @@ userRouter.post('/scanAdd/:id/', async (req, res) => {
   }
 });
 
+userRouter.post('/updateInfo', async (req, res) => {
+  try {
+    const { name, phoneNo, cart } = req.body;
+    let bill = await Bill.findOne();
+
+    if (!bill) {
+      // create new bill if not found
+      bill = new Bill({
+        phone_no: phoneNo,
+        name: name,
+        time: new Date().toISOString(),
+        cart: cart,
+      });
+    } else {
+      // update the existing bill
+      bill.phone_no = phoneNo;
+      bill.name = name;
+      bill.cart = cart;
+    }
+
+    // update total price
+    // const totalPrice = bill.cart.reduce((acc, item) => acc + item.product.price, 0);
+    // bill.totalPrice = totalPrice;
+
+    // save the bill
+    bill = await bill.save();
+
+    return res.json(bill).status(200);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
 
 
 
