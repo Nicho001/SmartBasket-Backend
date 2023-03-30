@@ -5,16 +5,16 @@ const Shop = require("../models/shop");
 const dateTime = require("node-datetime");
 const io = require("../socket");
 
-userRouter.post('/scanAdd/:id/:phone', async (req, res) => {
+userRouter.post('/scanAdd/:id/', async (req, res) => {
   try {
-    const { id, phone } = req.params;
-    let bill = await Bill.findOne({ phone_no: phone });
+    const { id } = req.params;
+    let bill = await Bill.find();
 
     if (!bill) {
       // create new bill if not found
       bill = new Bill({
-        phone_no: phone,
-        name: 'John Doe', // default name
+        phone_no: '',
+        name: '', // default name
         time: new Date().toISOString(),
         cart: [],
       });
