@@ -70,7 +70,7 @@ userRouter.post('/updateInfo', async (req, res) => {
     if (!bill) {
       // create new bill if not found
       bill = new Bill({
-        phone_no: phoneNo,
+        phone_no: phone,
         name: name,
         time: new Date().toISOString(),
         cart: cart,
