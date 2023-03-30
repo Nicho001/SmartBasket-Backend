@@ -64,7 +64,7 @@ userRouter.post('/scanAdd/:id/', async (req, res) => {
 
 userRouter.post('/updateInfo', async (req, res) => {
   try {
-    const { name, phoneNo, cart } = req.body;
+    const { name, phone, cart } = req.body;
     let bill = await Bill.findOne();
 
     if (!bill) {
@@ -77,7 +77,7 @@ userRouter.post('/updateInfo', async (req, res) => {
       });
     } else {
       // update the existing bill
-      bill.phone_no = phoneNo;
+      bill.phone_no = phone;
       bill.name = name;
       bill.cart = cart;
     }
