@@ -163,7 +163,7 @@ userRouter.post("/checkout/:total",  async (req, res) => {
     let finalbill = new FinalBill({
       phone_no:user.phone_no,
       name:user.name,
-      products: items,
+      cart: items,
       totalPrice: total,
       time: datetime,
     });
