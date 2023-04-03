@@ -40,8 +40,8 @@ const billSchema = new mongoose.Schema({
         
       },
       barcode: {
-        type: String,
-        
+        type: [String],
+        required: true,
       },
     },
   ],
