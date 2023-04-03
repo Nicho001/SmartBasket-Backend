@@ -43,7 +43,7 @@ const shopSchema = new mongoose.Schema({
         required: true,
       },
       barcode: {
-        type: [String],
+        type: String,
         required: true,
       },
       quantity: {
