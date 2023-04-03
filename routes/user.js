@@ -21,25 +21,25 @@ userRouter.post('/scanAdd/:id/', async (req, res) => {
       });
     }
 
-    const product = await Shop.findOne({ 'products.barcode': id });
+    const product = await Shop.findOne({ 'products.barcode': { $in: [id] } });
     if (product) {
       let isProductFound = false;
       for (let i = 0; i < bill.cart.length; i++) {
-        if (bill.cart[i].barcode == id) {
+        if (bill.cart[i].barcode.includes(id)) {
           isProductFound = true;
           // bill.cart[i].quantity++; // increase quantity if product already in cart
         }
       }
       if (isProductFound) {
         for (let i = 0; i < bill.cart.length; i++) {
-          if (bill.cart[i].barcode == id) {
+          if (bill.cart[i].barcode.includes(id)) {
             bill.cart.splice(i, 1);
             break; // add a break statement to exit the loop after deleting the product
           }
         }
       } else {
         // add new product to cart
-        const newProduct = product.products.find(p => p.barcode === id);
+        const newProduct = product.products.find(p => p.barcode.includes(id));
         bill.cart.push(newProduct);
       }
 
@@ -62,6 +62,7 @@ userRouter.post('/scanAdd/:id/', async (req, res) => {
     res.status(400).json({ error: e.message });
   }
 });
+
 
 userRouter.post('/updateInfo', async (req, res) => {
   try {
