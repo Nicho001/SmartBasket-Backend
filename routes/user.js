@@ -42,7 +42,7 @@ userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
         // add new product to cart
         newProduct = product.products.find(p => p.barcode === id);
         bill.cart.push({
-          ...newProduct,
+          newProduct,
           identifier: [idd],
         });
       }
