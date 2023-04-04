@@ -6,9 +6,9 @@ const Shop = require("../models/shop");
 const dateTime = require("node-datetime");
 const io = require("../socket");
 
-userRouter.post('/scanAdd/:id/', async (req, res) => {
+userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id, idd } = req.params;
     let bill = await Bill.findOne();
 
     if (!bill) {
@@ -40,7 +40,28 @@ userRouter.post('/scanAdd/:id/', async (req, res) => {
       } else {
         // add new product to cart
         const newProduct = product.products.find(p => p.barcode === id);
-        bill.cart.push(newProduct);
+        bill.cart.push({
+          ...newProduct,
+          identifier: [idd],
+        });
+      }
+
+      // update identifier
+      let isIdentifierFound = false;
+      for (let i = 0; i < bill.cart.length; i++) {
+        if (bill.cart[i].barcode == id && bill.cart[i].identifier.includes(idd)) {
+          isIdentifierFound = true;
+          bill.cart[i].identifier = bill.cart[i].identifier.filter((elem) => elem !== idd);
+          break; // add a break statement to exit the loop after removing the identifier
+        }
+      }
+      if (!isIdentifierFound) {
+        for (let i = 0; i < bill.cart.length; i++) {
+          if (bill.cart[i].barcode == id) {
+            bill.cart[i].identifier.push(idd);
+            break; // add a break statement to exit the loop after adding the identifier
+          }
+        }
       }
 
       // update total price
@@ -62,6 +83,7 @@ userRouter.post('/scanAdd/:id/', async (req, res) => {
     res.status(400).json({ error: e.message });
   }
 });
+
 
 
 userRouter.post('/updateInfo', async (req, res) => {
