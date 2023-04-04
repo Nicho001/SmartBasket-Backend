@@ -218,6 +218,18 @@ userRouter.post("/checkout/:total", async (req, res) => {
     });
     finalbill = await finalbill.save();
     res.status(200).json(finalbill);
+
+
+    user.cart.forEach(async (item) => {
+      let product = await Shop.findById(item.product);
+      if (!product) {
+        return res.status(400).json({ msg: "Product not found" });
+      }
+      let newQuantity = product.quantity - item.quantity;
+      product.quantity = newQuantity;
+      await product.save();
+    });
+    
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
