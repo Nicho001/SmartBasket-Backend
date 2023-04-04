@@ -43,6 +43,7 @@ userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
         bill.cart.push({
           ...newProduct,
           identifier: [idd],
+          barcode: id,
         });
       }
 
