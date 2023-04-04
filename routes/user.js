@@ -222,9 +222,10 @@ userRouter.post("/checkout/:total", async (req, res) => {
     user.cart.forEach(async (item) => {
       await Shop.findOneAndUpdate(
         { "products.barcode": item.barcode },
-        { $inc: { "products.$.quantity": -item.quantity } }
+        { $inc: { "products.$.quantity": -parseInt(item.quantity) } } // convert quantity to a number
       );
     });
+    
     
 
     res.status(200).json(finalbill);
