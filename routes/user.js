@@ -22,7 +22,7 @@ userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
       });
     }
 
-    const product = await Shop.findOne({ 'products.barcode': id });
+    const product = await Shop.findOne({ 'products.barcode': id }, { 'products.$': 1 });
     if (product) {
       let isProductFound = false;
       for (let i = 0; i < bill.cart.length; i++) {
@@ -31,39 +31,64 @@ userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
           // bill.cart[i].quantity++; // increase quantity if product already in cart
         }
       }
-      if (isProductFound) {
-        for (let i = 0; i < bill.cart.length; i++) {
-          if (bill.cart[i].barcode == id) {
-            bill.cart.splice(i, 1);
-            break; // add a break statement to exit the loop after deleting the product
-          }
-        }
-      } else {
-        // add new product to cart
-        newProduct = product.products.find(p => p.barcode === id);
-        bill.cart.push({
-          newProduct,
-          identifier: [idd],
-        });
-      }
+      // if (isProductFound) {
+      //   for (let i = 0; i < bill.cart.length; i++) {
+      //     if (bill.cart[i].barcode == id) {
+      //       bill.cart.splice(i, 1);
+      //       break; // add a break statement to exit the loop after deleting the product
+      //     }
+      //   }
+      // } else {
+      //   const prod = product._doc.products[0]._doc;
+      //   bill.cart.push({
+      //     name: prod.name,
+      //     description: prod.description,
+      //     images: prod.images,
+      //     price: prod.price,
+      //     category: prod.category,
+      //     barcode: prod.barcode,
+      //     quantity: prod.quantity,
+      //     identifier: [idd],
+      //   });
 
-      // update identifier
+      // }
+
+      //update identifier
       let isIdentifierFound = false;
       for (let i = 0; i < bill.cart.length; i++) {
-        if (bill.cart[i].barcode == id && bill.cart[i].identifier.includes(idd)) {
-          isIdentifierFound = true;
-          bill.cart[i].identifier = bill.cart[i].identifier.filter((elem) => elem !== idd);
-          break; // add a break statement to exit the loop after removing the identifier
-        }
-      }
-      if (!isIdentifierFound) {
-        for (let i = 0; i < bill.cart.length; i++) {
-          if (bill.cart[i].barcode == id) {
+        if (bill.cart[i].barcode == id) {
+          if (!bill.cart[i].identifier.includes(idd)) {
+            // if identifier does not exist, add it to the array
             bill.cart[i].identifier.push(idd);
-            break; // add a break statement to exit the loop after adding the identifier
+          } else {
+            // if identifier exists, remove it from the array
+            bill.cart[i].identifier = bill.cart[i].identifier.filter((elem) => elem !== idd);
           }
+          // set the quantity as the length of the identifier array
+          bill.cart[i].quantity = bill.cart[i].identifier.length;
+          // remove the product from the cart if the identifier array is empty
+          if (bill.cart[i].identifier.length == 0) {
+            bill.cart.splice(i, 1);
+          }
+          isIdentifierFound = true;
+          break;
         }
       }
+      
+      if (!isIdentifierFound) {
+        // if the product with the barcode is not found in the cart, add it to the cart
+        const newProduct = {
+          ...product._doc.products[0]._doc,
+          identifier: [idd],
+          quantity: 1,
+        };
+        bill.cart.push(newProduct);
+      }
+      
+
+      
+      
+
 
       // update total price
       // const totalPrice = bill.cart.reduce((acc, item) => acc + item.product.price, 0);
@@ -76,7 +101,7 @@ userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
         details: bill
       });
 
-      return res.json(newProduct).status(200);
+      return res.json(bill).status(200);
     } else {
       return res.json({ error: 'Product not found' }).status(404);
     }
@@ -171,9 +196,9 @@ userRouter.post('/updateInfo', async (req, res) => {
 //   }
 // });
 
-userRouter.post("/checkout/:total",  async (req, res) => {
+userRouter.post("/checkout/:total", async (req, res) => {
   try {
-    const {total } = req.params;
+    const { total } = req.params;
     let user = await Bill.findOne();
     if (user.cart.length == 0) {
       return res.status(400).json({ msg: "Cart Empty" });
@@ -185,8 +210,8 @@ userRouter.post("/checkout/:total",  async (req, res) => {
     let datetime = dt.format("d-m-Y\nI:M p");
 
     let finalbill = new FinalBill({
-      phone_no:user.phone_no,
-      name:user.name,
+      phone_no: user.phone_no,
+      name: user.name,
       cart: items,
       totalPrice: total,
       time: datetime,

@@ -39,6 +39,10 @@ const finalbillSchema = new mongoose.Schema({
         type: String,
         
       },
+      quantity: {
+        type: String,
+        // required: true,
+      },
       barcode: {
         type: String,
         required: true,
