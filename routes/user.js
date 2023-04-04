@@ -217,23 +217,26 @@ userRouter.post("/checkout/:total", async (req, res) => {
       time: datetime,
     });
     finalbill = await finalbill.save();
+
+    // subtract purchased quantity from total quantity in shop collection
+    for (let item of items) {
+      let product = await Shop.findOne({ "products._id": item._id });
+      let productIndex = product.products.findIndex((p) => p._id == item._id);
+      let purchasedQuantity = parseInt(item.quantity);
+      let totalQuantity = parseInt(product.products[productIndex].quantity);
+      let remainingQuantity = totalQuantity - purchasedQuantity;
+      await Shop.updateOne(
+        { "products._id": item._id },
+        { $inc: { "products.$.quantity": -purchasedQuantity } }
+      );
+    }
+
     res.status(200).json(finalbill);
-
-
-    user.cart.forEach(async (item) => {
-      let product = await Shop.findById(item.product);
-      if (!product) {
-        return res.status(400).json({ msg: "Product not found" });
-      }
-      let newQuantity = product.quantity - item.quantity;
-      product.quantity = newQuantity;
-      await product.save();
-    });
-    
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
+
 
 userRouter.get("/recentpurchases", async (req, res) => {
   try {
