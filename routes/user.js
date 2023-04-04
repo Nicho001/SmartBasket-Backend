@@ -8,6 +8,7 @@ const io = require("../socket");
 
 userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
   try {
+    let newProduct;
     const { id, idd } = req.params;
     let bill = await Bill.findOne();
 
@@ -39,11 +40,10 @@ userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
         }
       } else {
         // add new product to cart
-        const newProduct = product.products.find(p => p.barcode === id);
+        newProduct = product.products.find(p => p.barcode === id);
         bill.cart.push({
           ...newProduct,
           identifier: [idd],
-          barcode: id,
         });
       }
 
@@ -76,7 +76,7 @@ userRouter.post('/scanAdd/:id/:idd', async (req, res) => {
         details: bill
       });
 
-      return res.json(product).status(200);
+      return res.json(newProduct).status(200);
     } else {
       return res.json({ error: 'Product not found' }).status(404);
     }
