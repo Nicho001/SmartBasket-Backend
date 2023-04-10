@@ -222,7 +222,7 @@ userRouter.post("/checkout/:total", async (req, res) => {
     items.forEach(async (item) => {
       await Shop.findOneAndUpdate(
         { "products.barcode": item.barcode },
-        { $inc: { "products.$.quantity": -item.quantity } }
+        { $inc: { "products.$.quantity": -parseInt(item.quantity) } }
       );
     });
     
