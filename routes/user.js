@@ -221,7 +221,7 @@ userRouter.post("/checkout/:total", async (req, res) => {
     // subtract purchased quantity from total quantity in shop collection
     items.forEach(async (item) => {
       await Shop.findOneAndUpdate(
-        { "products.barcode": item.barcode },
+        { "products.$.barcode": item.barcode },
         { $inc: { "products.$.quantity": -parseInt(item.quantity) } }
       );
     });
